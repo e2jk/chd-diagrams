@@ -23,6 +23,9 @@ def get_dumped_json(dump_file):
 def download_single_image(url, filepath):
     logging.debug("Downloading %s to %s" % (url, filepath))
     (filename, headers) = urllib.request.urlretrieve(url, filepath)
+    if headers["Content-Type"] not in ("image/png", "application/postscript"):
+        logging.error("Downloaded file is not an image: %s - %s - Content-Type %s" % (url, filepath, headers["Content-Type"]))
+        os.remove(filepath)
 
 def download_images(category, website_root, json_content):
     logging.debug("Downloading images for %s" % category)
@@ -37,6 +40,12 @@ def download_images(category, website_root, json_content):
         ext = os.path.splitext(urllib.parse.urlparse(bw_img).path)[1]
         filepath = os.path.join(output_folder, name + ext)
         download_single_image(bw_img, filepath)
+        # Some files are .ai files, but often the .png variant also exists, try downloading that as well
+        if ext != ".png":
+            bw_img_png = bw_img[:-len(ext)] + ".png"
+            logging.debug("Source file is %s, also trying to download the .png file %s" % (ext, bw_img_png))
+            filepath = os.path.join(output_folder, name + ".png")
+            download_single_image(bw_img_png, filepath)
 
 def download_json(url):
     filename = "output/%s.json" % url.split("/")[-1]
