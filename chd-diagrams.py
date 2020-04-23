@@ -25,15 +25,19 @@ def get_dumped_json(dump_file):
     return dumped_json
 
 def download_single_image(url, filepath):
-    logging.debug("Downloading %s to %s" % (url, filepath))
-    req = urllib.request.Request(url, None, HEADERS)
-    with urllib.request.urlopen(req) as response:
-        content_type = response.info()["Content-Type"]
-        with open(filepath, 'wb') as ofile:
-            ofile.write(response.read())
-    if content_type not in ("image/png", "application/postscript"):
-        logging.error("Downloaded file is not an image: %s - %s - Content-Type: '%s'" % (url, filepath, content_type))
-        os.remove(filepath)
+    if not os.path.exists(filepath):
+        logging.debug("Downloading %s to %s" % (url, filepath))
+        req = urllib.request.Request(url, None, HEADERS)
+        with urllib.request.urlopen(req) as response:
+            content_type = response.info()["Content-Type"]
+            with open(filepath, 'wb') as ofile:
+                ofile.write(response.read())
+        if content_type not in ("image/png", "application/postscript"):
+            logging.error("Downloaded file is not an image: %s - %s - Content-Type: '%s'" % (url, filepath, content_type))
+            os.remove(filepath)
+    else:
+        # logging.debug("Not downloading file %s to %s, already present" % (url, filepath))
+        pass
 
 def download_images(category, json_content):
     logging.debug("Downloading images for %s" % category)
