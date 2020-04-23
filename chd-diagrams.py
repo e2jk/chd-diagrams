@@ -81,7 +81,8 @@ def download_json(url):
 
 def init():
     if __name__ == "__main__":
-        logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.WARNING)
         logging.debug("Starting up")
         for (category, url) in [("Heart Disease", "/backend/json/illustrationen"), ("Heart Operation", "/backend/json/opillustrationen")]:
             logging.debug("-"*32)
