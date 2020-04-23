@@ -9,6 +9,8 @@ import urllib.request
 import urllib.parse
 import json
 
+# Static values that apply to the entire script
+WEBSITE_ROOT = "http://www.chd-diagrams.com"
 HEADERS = {"User-Agent": "chd-diagrams helper tool (https://github.com/e2jk/chd-diagrams)"}
 
 def get_dumped_json(dump_file):
@@ -33,7 +35,7 @@ def download_single_image(url, filepath):
         logging.error("Downloaded file is not an image: %s - %s - Content-Type: '%s'" % (url, filepath, content_type))
         os.remove(filepath)
 
-def download_images(category, website_root, json_content):
+def download_images(category, json_content):
     logging.debug("Downloading images for %s" % category)
     output_folder = "output/%s" % category
     if not os.path.exists(output_folder):
@@ -43,7 +45,7 @@ def download_images(category, website_root, json_content):
     for i in json_content[list(json_content)[0]]:
         img_name = i["name"]
         img_id = i["id"]
-        bw_img = "%s%s" % (website_root, i["illustration_bw"])
+        bw_img = "%s%s" % (WEBSITE_ROOT, i["illustration_bw"])
         ext = os.path.splitext(urllib.parse.urlparse(bw_img).path)[1]
         filename = "%s-%s-%s" % (img_name, img_id, os.path.basename(urllib.parse.urlparse(bw_img).path))
         filepath = os.path.join(output_folder, filename)
@@ -74,11 +76,10 @@ def init():
     if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Starting up")
-        website_root = "http://www.chd-diagrams.com"
         for (category, url) in [("Heart Disease", "/backend/json/illustrationen"), ("Heart Operation", "/backend/json/opillustrationen")]:
             logging.debug("-"*32)
             logging.debug("Processing %s" % category)
-            json_content = download_json("%s%s" % (website_root, url))
-            download_images(category, website_root, json_content)
+            json_content = download_json("%s%s" % (WEBSITE_ROOT, url))
+            download_images(category, json_content)
 
 init()
