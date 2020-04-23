@@ -9,6 +9,8 @@ import urllib.request
 import urllib.parse
 import json
 
+HEADERS = {"User-Agent": "chd-diagrams helper tool (https://github.com/e2jk/chd-diagrams)"}
+
 def get_dumped_json(dump_file):
     # Use a previously dumped file if it exists, to bypass the network transactions
     dumped_json = []
@@ -22,9 +24,13 @@ def get_dumped_json(dump_file):
 
 def download_single_image(url, filepath):
     logging.debug("Downloading %s to %s" % (url, filepath))
-    (filename, headers) = urllib.request.urlretrieve(url, filepath)
-    if headers["Content-Type"] not in ("image/png", "application/postscript"):
-        logging.error("Downloaded file is not an image: %s - %s - Content-Type %s" % (url, filepath, headers["Content-Type"]))
+    req = urllib.request.Request(url, None, HEADERS)
+    with urllib.request.urlopen(req) as response:
+        content_type = response.info()["Content-Type"]
+        with open(filepath, 'wb') as ofile:
+            ofile.write(response.read())
+    if content_type not in ("image/png", "application/postscript"):
+        logging.error("Downloaded file is not an image: %s - %s - Content-Type: '%s'" % (url, filepath, content_type))
         os.remove(filepath)
 
 def download_images(category, website_root, json_content):
@@ -54,8 +60,9 @@ def download_json(url):
     json_content = get_dumped_json(filename)
     if not json_content:
         logging.debug("Downloading JSON file %s" % url)
-        with urllib.request.urlopen(url) as urlreq:
-            json_content = json.loads(urlreq.read().decode())
+        req = urllib.request.Request(url, None, HEADERS)
+        with urllib.request.urlopen(req) as response:
+            json_content = json.loads(response.read().decode())
         if not os.path.exists("output"):
             os.mkdir("output")
         with open(filename, 'w') as out_file:
