@@ -35,16 +35,18 @@ def download_images(category, website_root, json_content):
     # First key is different in the 2 data sets:
     # illustrationen vs. operationsIllustrationen
     for i in json_content[list(json_content)[0]]:
-        name = i["name"]
+        img_name = i["name"]
+        img_id = i["id"]
         bw_img = "%s%s" % (website_root, i["illustration_bw"])
         ext = os.path.splitext(urllib.parse.urlparse(bw_img).path)[1]
-        filepath = os.path.join(output_folder, name + ext)
+        filename = "%s-%s-%s" % (img_name, img_id, os.path.basename(urllib.parse.urlparse(bw_img).path))
+        filepath = os.path.join(output_folder, filename)
         download_single_image(bw_img, filepath)
         # Some files are .ai files, but often the .png variant also exists, try downloading that as well
         if ext != ".png":
             bw_img_png = bw_img[:-len(ext)] + ".png"
-            logging.debug("Source file is %s, also trying to download the .png file %s" % (ext, bw_img_png))
-            filepath = os.path.join(output_folder, name + ".png")
+            logging.info("Source file is %s, also trying to download the .png file %s" % (ext, bw_img_png))
+            filepath = filepath[:-len(ext)] + ".png"
             download_single_image(bw_img_png, filepath)
 
 def download_json(url):
