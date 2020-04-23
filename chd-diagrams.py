@@ -51,7 +51,10 @@ def download_images(category, json_content):
         img_id = i["id"]
         bw_img = "%s%s" % (WEBSITE_ROOT, i["illustration_bw"])
         ext = os.path.splitext(urllib.parse.urlparse(bw_img).path)[1]
-        filename = "%s-%s-%s" % (img_name, img_id, os.path.basename(urllib.parse.urlparse(bw_img).path))
+        descriptive_max_length = 120
+        filename = "%s-%s-%s" % (img_name[:descriptive_max_length], img_id, os.path.basename(urllib.parse.urlparse(bw_img).path))
+        if len(img_name) > descriptive_max_length:
+            logging.warning("Filename too long, truncated to '%s', full descriptive name: '%s'" % (filename, img_name))
         filepath = os.path.join(output_folder, filename)
         download_single_image(bw_img, filepath)
         # Some files are .ai files, but often the .png variant also exists, try downloading that as well
